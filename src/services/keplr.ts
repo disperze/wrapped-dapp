@@ -8,19 +8,17 @@ export class Keplr {
     constructor() {
     }
 
-    async rpcCon() {
+    async getConnection(): Promise<SigningCosmWasmClient> {
         const chainId = "lucina";
 
         const w = (window as any);
         await w.keplr.enable(chainId);
     
         const offlineSigner = w.getOfflineSigner(chainId);
-        const cosmJS = await SigningCosmWasmClient.connectWithSigner(
+        return SigningCosmWasmClient.connectWithSigner(
             "https://rpc.juno.giansalex.dev:443",
             offlineSigner
         );
-
-        const info: TokenInfo = await cosmJS.queryContractSmart("", {token_info: {}});
     }
 
     async connect(): Promise<String> {
