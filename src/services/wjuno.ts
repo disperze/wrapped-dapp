@@ -6,7 +6,7 @@ export class Wjuno {
     constructor(
         private contract: string,
         private client: SigningCosmWasmClient,
-        private txs: TxMsgs
+        private txs?: TxMsgs
     ) {
     }
 
@@ -22,12 +22,13 @@ export class Wjuno {
         return this.client.execute(sender, this.contract, executMsg);
     }
 
-    async withdrawFull(sender: string, amount: string) {
+    async withdrawFull(sender: string, cw20Contrat: string, amount: string) {
         const increaseAllowance = {increase_allowance: {spender: this.contract, amount: amount}};
         const withdraw = {withdraw: {amount: amount}};
-        const allowanceMsg = this.txs.buildMsg(sender, this.contract, increaseAllowance);
-        const withdrawMsg = this.txs.buildMsg(sender, this.contract, withdraw);
+        const txs: TxMsgs = this.txs!;
+        const allowanceMsg = txs.buildMsg(sender, cw20Contrat, increaseAllowance);
+        const withdrawMsg = txs.buildMsg(sender, this.contract, withdraw);
         
-        return this.txs.execute(sender, [allowanceMsg, withdrawMsg]);
+        return txs.execute(sender, [allowanceMsg, withdrawMsg]);
     }
 }
