@@ -1,30 +1,24 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import {
     Card,
-    Divider,
     TabItem,
     TabItems,
     Tab,
     Tabs,
     overrideThemeVariables,
     CardContent,
-    Subtitle2,
     H5,
-    Body2,
-    CardAction,
-    Button,
     TextField,
     Fab,
     Caption,
     IconButton,
-    ToggleButton
 } from 'ui-neumorphism';
 import 'ui-neumorphism/dist/index.css';
 import 'bootstrap-grid-only-css/dist/css/bootstrap-grid.min.css';
 import { Icon } from '@mdi/react';
 import { mdiRun, mdiChevronRight } from '@mdi/js';
-import { CW20, Keplr, TxMsgs, Wjuno } from '../services';
+import { CW20, Keplr, TxMsgs, Wjuno, WjunoExtend } from '../services';
 import { CosmWasmFeeTable, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasLimits, defaultGasLimits as defaultStargateGasLimits } from '@cosmjs/stargate';
 
@@ -106,7 +100,7 @@ class MainContainer extends Component<IProps, IState> {
           return;
       }
 
-      const client = new Wjuno(this.contrat, this.conn!);
+      const client = new Wjuno(this.conn!, this.contrat);
 
       const result = await client.deposit(this.state.wallet!, {amount: this.depositAmount.toString(), denom: "ujuno"});
       console.log(result);
@@ -122,7 +116,7 @@ class MainContainer extends Component<IProps, IState> {
     }
 
     const txs = new TxMsgs(this.conn!, this.gasLimits);
-    const client = new Wjuno(this.contrat, this.conn!, txs);
+    const client = new WjunoExtend(txs, this.contrat);
 
     const result = await client.withdrawFull(this.state.wallet!, this.cw20Contract, this.withdrawAmount.toString());
     console.log(result);
