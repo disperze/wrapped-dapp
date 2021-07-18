@@ -1,5 +1,6 @@
 export { CW20 } from "./cw20";
 export type { Cw20Balance } from "./cw20-balance";
 export { Keplr } from "./keplr";
+export { WjunoExtend } from "./wjuno-extend";
 export { Wjuno } from "./wjuno";
 export { TxMsgs } from "./tx-msgs";
