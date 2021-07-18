@@ -24,7 +24,7 @@ import 'ui-neumorphism/dist/index.css';
 import 'bootstrap-grid-only-css/dist/css/bootstrap-grid.min.css';
 import { Icon } from '@mdi/react';
 import { mdiTicket, mdiRun, mdiChevronRight, mdiFormatBold } from '@mdi/js';
-import Keplr from '../services/keplr';
+import { Keplr } from '../services';
 
 interface IProps {
 }

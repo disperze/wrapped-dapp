@@ -4,7 +4,7 @@ interface TokenInfo {
     symbol: String
 }
 
-class Keplr {
+export class Keplr {
     constructor() {
     }
 
@@ -21,7 +21,6 @@ class Keplr {
         );
 
         const info: TokenInfo = await cosmJS.queryContractSmart("", {token_info: {}});
-        
     }
 
     async connect(): Promise<String> {
@@ -150,5 +149,3 @@ class Keplr {
         return false;
     }
 }
-
-export default Keplr;
