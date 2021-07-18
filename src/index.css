@@ -114,3 +114,12 @@ main {
 .text-right {
   text-align: right;
 }
+
+.connect-btn button {
+  text-transform: none;
+}
+
+.textfield>div,
+.textfield input {
+  width: 100%;
+}

@@ -30,6 +30,8 @@ interface IState {
     wallet?: string;
     balance?: number;
     cw20balance?: number;
+    connect: boolean;
+    disableButtons: boolean;
 }
 
 class MainContainer extends Component<IProps, IState> {
@@ -47,6 +49,8 @@ class MainContainer extends Component<IProps, IState> {
             active: 0,
             balance: 0,
             cw20balance: 0,
+            connect: false,
+            disableButtons: true
         };
         overrideThemeVariables({
             '--light-bg': '#E4EBF5',
@@ -70,9 +74,15 @@ class MainContainer extends Component<IProps, IState> {
     }
 
   async connectWallet() {
+      if (this.state.connect) {
+          return;
+      }
+      
       const wallet = await this.kep.connect() as string;
       this.setState({
         wallet: wallet,
+        connect: true,
+        disableButtons: false,
       });
       
       this.conn = await this.kep.getConnection(this.gasLimits);
@@ -100,9 +110,15 @@ class MainContainer extends Component<IProps, IState> {
           return;
       }
 
+      if (this.depositAmount > this.state.balance!) {
+        alert("Insuficient funds");
+        return;
+      }
+
       const client = new Wjuno(this.conn!, this.contrat);
 
-      const result = await client.deposit(this.state.wallet!, {amount: this.depositAmount.toString(), denom: "ujuno"});
+      const deposit = this.depositAmount * Math.pow(10, 6);
+      const result = await client.deposit(this.state.wallet!, {amount: deposit.toString(), denom: "ujuno"});
       console.log(result);
       alert(result.transactionHash);
 
@@ -114,11 +130,17 @@ class MainContainer extends Component<IProps, IState> {
         alert("Withdraw amount required");
         return;
     }
+    
+    if (this.withdrawAmount > this.state.cw20balance!) {
+        alert("Insuficient funds");
+        return;
+    }
 
     const txs = new TxMsgs(this.conn!, this.gasLimits);
     const client = new WjunoExtend(txs, this.contrat);
 
-    const result = await client.withdrawFull(this.state.wallet!, this.cw20Contract, this.withdrawAmount.toString());
+    const withdraw = this.withdrawAmount * Math.pow(10, 6);
+    const result = await client.withdrawFull(this.state.wallet!, this.cw20Contract, withdraw.toString());
     console.log(result);
     alert(result.transactionHash);
 
@@ -126,11 +148,18 @@ class MainContainer extends Component<IProps, IState> {
   }
 
   setDepositAmount(e: {value: string}) {
-    this.depositAmount = parseFloat(e.value || "0") * Math.pow(10, 6);
+    this.depositAmount = parseFloat(e.value || "0");
   }
 
   setWithdrawAmount(e: {value: string}) {
-    this.withdrawAmount = parseFloat(e.value || "0") * Math.pow(10, 6);
+    this.withdrawAmount = parseFloat(e.value || "0");
+  }
+
+  private getWalletMin(wallet: string): string {
+      const first = wallet.substring(0, 10); 
+      const last = wallet.substring(wallet.length - 8);
+
+      return first+"..."+last;
   }
 
   render() {
@@ -146,7 +175,9 @@ class MainContainer extends Component<IProps, IState> {
                     <TextField
                         label="Enter amount"
                         onChange={this.setDepositAmount.bind(this)}
-                        style={{ margin: "0" }}
+                        className="textfield"
+                        style={{ margin: "0", width: "100%" }}
+                        type='number'
                     ></TextField>
                     <div className="text-center">
                         <IconButton
@@ -154,6 +185,7 @@ class MainContainer extends Component<IProps, IState> {
                             dark
                             onClick={async () => await this.deposit()}
                             size='small'
+                            disabled={this.state.disableButtons}
                             rounded
                         >
                             <Icon
@@ -173,7 +205,9 @@ class MainContainer extends Component<IProps, IState> {
                     <TextField
                         label="Enter amount"
                         onChange={this.setWithdrawAmount.bind(this)}
-                        style={{ margin: "0" }}
+                        className="textfield"
+                        type='number'
+                        style={{ margin: "0", width: "100%" }}
                     ></TextField>
                     <div className="text-center">
                         <IconButton
@@ -181,6 +215,7 @@ class MainContainer extends Component<IProps, IState> {
                             dark
                             onClick={async () => await this.withdraw()}
                             size='small'
+                            disabled={this.state.disableButtons}
                             rounded
                         >
                             <Icon
@@ -195,17 +230,25 @@ class MainContainer extends Component<IProps, IState> {
       </TabItems>
     );
 
+    let connectButton;
+    if (this.state.connect) {
+        connectButton = <p>&nbsp;<span style={{ fontSize: '16px' }}>&#128274;</span>&nbsp;{this.getWalletMin(this.state.wallet!)}&nbsp;</p>
+    } else {
+        connectButton = <p>&nbsp;<span style={{ fontSize: '16px' }}>&#128275;</span>&nbsp;CONNECT WALLET&nbsp;</p>
+    }
+
     return (
         <main className={`theme--dark bootstrap-wrapper`}>
             <div style={{width: "100%", textAlign: "right"}}>
-                <Fab dark color='var(--primary)' style={{marginTop: "20px", marginRight: "30px"}}
+                <Fab dark color='var(--primary)' className="connect-btn"
+                    style={{marginTop: "20px", marginRight: "30px"}}
                     onClick={async () => await this.connectWallet()}
                 >
-                    &nbsp;<span style={{ fontSize: '24px' }}>&#9729;</span>&nbsp;Connect wallet&nbsp;
+                    {connectButton}
                 </Fab>
             </div>
             <div className="row" style={{margin: "80px 0"}}>
-                <div className="col-md-6 ma-auto">
+                <div className="col-md-7 ma-auto">
                     <Card dark className="pa-5">
                     <CardContent>
                         <div className="row">
@@ -225,7 +268,7 @@ class MainContainer extends Component<IProps, IState> {
                                 >
                                     <Card flat>
                                         <Icon path={mdiRun} size={2.5} color='var(--primary)' />
-                                        <H5 style={{ padding: '4px 0px' }}>{this.state.cw20balance}</H5>
+                                        <H5 style={{ padding: '4px 0px', textAlign: "center" }}>{this.state.cw20balance}</H5>
 
                                         <Caption secondary className="text-center">
                                             WJUNO
