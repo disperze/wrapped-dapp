@@ -1,4 +1,5 @@
-import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { CosmWasmFeeTable, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { GasLimits } from "@cosmjs/stargate"
 
 interface TokenInfo {
     symbol: String
@@ -8,16 +9,20 @@ export class Keplr {
     constructor() {
     }
 
-    async getConnection(): Promise<SigningCosmWasmClient> {
+    async getConnection(gasLimits: GasLimits<CosmWasmFeeTable>): Promise<SigningCosmWasmClient> {
         const chainId = "lucina";
 
         const w = (window as any);
         await w.keplr.enable(chainId);
     
         const offlineSigner = w.getOfflineSigner(chainId);
+
         return SigningCosmWasmClient.connectWithSigner(
             "https://rpc.juno.giansalex.dev:443",
-            offlineSigner
+            offlineSigner,
+            {
+                gasLimits: gasLimits
+            }
         );
     }
 

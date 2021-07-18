@@ -25,7 +25,8 @@ import 'bootstrap-grid-only-css/dist/css/bootstrap-grid.min.css';
 import { Icon } from '@mdi/react';
 import { mdiRun, mdiChevronRight } from '@mdi/js';
 import { CW20, Keplr, TxMsgs, Wjuno } from '../services';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { CosmWasmFeeTable, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasLimits, defaultGasLimits as defaultStargateGasLimits } from '@cosmjs/stargate';
 
 interface IProps {
 }
@@ -44,6 +45,7 @@ class MainContainer extends Component<IProps, IState> {
     cw20Contract: string = "juno18j6kr2f6l8yvn62wsu35mrwucxrq239d9ss9ry";
     depositAmount: number = 0;
     withdrawAmount: number = 0;
+    private gasLimits: GasLimits<CosmWasmFeeTable>;
     
     constructor (props: IProps) {
         super(props);
@@ -63,6 +65,14 @@ class MainContainer extends Component<IProps, IState> {
             '--primary-dark': '#2962ff',
             '--primary-light': '#82b1ff'
         });
+        this.gasLimits = {
+            ...defaultStargateGasLimits,
+            upload: 1_500_000,
+            init: 500_000,
+            migrate: 200_000,
+            exec: 240_000,
+            changeAdmin: 80_000,
+        };
     }
 
   async connectWallet() {
@@ -71,7 +81,7 @@ class MainContainer extends Component<IProps, IState> {
         wallet: wallet,
       });
       
-      this.conn = await this.kep.getConnection();
+      this.conn = await this.kep.getConnection(this.gasLimits);
       await this.updateBalance();
   }
 
@@ -111,7 +121,7 @@ class MainContainer extends Component<IProps, IState> {
         return;
     }
 
-    const txs = new TxMsgs(this.conn!);
+    const txs = new TxMsgs(this.conn!, this.gasLimits);
     const client = new Wjuno(this.contrat, this.conn!, txs);
 
     const result = await client.withdrawFull(this.state.wallet!, this.cw20Contract, this.withdrawAmount.toString());

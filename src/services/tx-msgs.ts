@@ -1,10 +1,10 @@
 import { CosmWasmFeeTable, defaultGasLimits, ExecuteResult, MsgExecuteContractEncodeObject, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { toUtf8 } from "@cosmjs/encoding";
-import { defaultGasPrice, Coin, buildFeeTable, isBroadcastTxFailure, BroadcastTxFailure, logs } from "@cosmjs/stargate";
+import { defaultGasPrice, Coin, buildFeeTable, isBroadcastTxFailure, BroadcastTxFailure, logs, GasLimits } from "@cosmjs/stargate";
 import { EncodeObject } from "@cosmjs/proto-signing";
 
 export class TxMsgs {
-    constructor(private client: SigningCosmWasmClient) {
+    constructor(private client: SigningCosmWasmClient, private gasLimit: GasLimits<CosmWasmFeeTable>) {
     }
 
     async execute(
@@ -12,7 +12,7 @@ export class TxMsgs {
         msgs: EncodeObject[],
         memo = "",
     ): Promise<ExecuteResult> {
-        const fees = buildFeeTable<CosmWasmFeeTable>(defaultGasPrice, defaultGasLimits, {});
+        const fees = buildFeeTable<CosmWasmFeeTable>(defaultGasPrice, this.gasLimit, {});
 
         const result = await this.client.signAndBroadcast(senderAddress, msgs, fees.exec, memo);
         if (isBroadcastTxFailure(result)) {
