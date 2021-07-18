@@ -23,23 +23,34 @@ import {
 import 'ui-neumorphism/dist/index.css';
 import 'bootstrap-grid-only-css/dist/css/bootstrap-grid.min.css';
 import { Icon } from '@mdi/react';
-import { mdiTicket, mdiRun, mdiChevronRight, mdiFormatBold } from '@mdi/js';
-import { Keplr } from '../services';
+import { mdiRun, mdiChevronRight } from '@mdi/js';
+import { CW20, Keplr, TxMsgs, Wjuno } from '../services';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 interface IProps {
 }
 
 interface IState {
     active?: number;
+    wallet?: string;
+    balance?: number;
+    cw20balance?: number;
 }
 
 class MainContainer extends Component<IProps, IState> {
     kep: Keplr = new Keplr;
+    conn?: SigningCosmWasmClient;
+    contrat: string = "juno1qglsnq9juk38325t02jfx44rg85jxsx4rg2xc8";
+    cw20Contract: string = "juno18j6kr2f6l8yvn62wsu35mrwucxrq239d9ss9ry";
+    depositAmount: number = 0;
+    withdrawAmount: number = 0;
     
     constructor (props: IProps) {
         super(props);
         this.state = {
-            active: 0
+            active: 0,
+            balance: 0,
+            cw20balance: 0,
         };
         overrideThemeVariables({
             '--light-bg': '#E4EBF5',
@@ -54,10 +65,70 @@ class MainContainer extends Component<IProps, IState> {
         });
     }
 
-  connectWallet() {
-      this.kep.connect()
-      .then(address => alert(address));
+  async connectWallet() {
+      const wallet = await this.kep.connect() as string;
+      this.setState({
+        wallet: wallet,
+      });
+      
+      this.conn = await this.kep.getConnection();
+      await this.updateBalance();
   }
+
+  private async updateBalance() {
+      const client = new CW20(this.conn!, this.cw20Contract);
+
+      const cw20Result = await client.balance(this.state.wallet! as string)
+      let balance = parseInt(cw20Result.balance) / Math.pow(10, 6);
+      this.setState({
+        cw20balance: balance,
+      });
+      const result = await this.conn?.getBalance(this.state.wallet!, "ujuno");
+      balance = parseInt(result?.amount!) / Math.pow(10, 6);
+      this.setState({
+        balance: balance,
+      });
+  }
+
+  async deposit() {
+      if (this.depositAmount <= 0) {
+          alert("Deposit amount required");
+          return;
+      }
+
+      const client = new Wjuno(this.contrat, this.conn!);
+
+      const result = await client.deposit(this.state.wallet!, {amount: this.depositAmount.toString(), denom: "ujuno"});
+      console.log(result);
+      alert(result.transactionHash);
+
+      await this.updateBalance();
+  }
+
+  async withdraw() {
+    if (this.withdrawAmount <= 0) {
+        alert("Withdraw amount required");
+        return;
+    }
+
+    const txs = new TxMsgs(this.conn!);
+    const client = new Wjuno(this.contrat, this.conn!, txs);
+
+    const result = await client.withdrawFull(this.state.wallet!, this.cw20Contract, this.withdrawAmount.toString());
+    console.log(result);
+    alert(result.transactionHash);
+
+    await this.updateBalance();
+  }
+
+  setDepositAmount(e: {value: string}) {
+    this.depositAmount = parseFloat(e.value || "0") * Math.pow(10, 6);
+  }
+
+  setWithdrawAmount(e: {value: string}) {
+    this.withdrawAmount = parseFloat(e.value || "0") * Math.pow(10, 6);
+  }
+
   render() {
     const { active } = this.state;
 
@@ -66,16 +137,18 @@ class MainContainer extends Component<IProps, IState> {
         <TabItem>
         <Card dark inset style={{ padding: '16px' }}>
                     <Caption disabled secondary className="mb-3">
-                        Available: 200 JUNO
+                        Available: {this.state.balance} JUNO
                     </Caption>
                     <TextField
                         label="Enter amount"
+                        onChange={this.setDepositAmount.bind(this)}
                         style={{ margin: "0" }}
                     ></TextField>
                     <div className="text-center">
                         <IconButton
                             text={false}
                             dark
+                            onClick={async () => await this.deposit()}
                             size='small'
                             rounded
                         >
@@ -91,16 +164,18 @@ class MainContainer extends Component<IProps, IState> {
         <TabItem>
         <Card dark inset style={{ padding: '16px' }}>
                     <Caption disabled secondary className="mb-3">
-                        Available: 200 WJUNO
+                        Available: {this.state.cw20balance} WJUNO
                     </Caption>
                     <TextField
                         label="Enter amount"
+                        onChange={this.setWithdrawAmount.bind(this)}
                         style={{ margin: "0" }}
                     ></TextField>
                     <div className="text-center">
                         <IconButton
                             text={false}
                             dark
+                            onClick={async () => await this.withdraw()}
                             size='small'
                             rounded
                         >
@@ -120,7 +195,7 @@ class MainContainer extends Component<IProps, IState> {
         <main className={`theme--dark bootstrap-wrapper`}>
             <div style={{width: "100%", textAlign: "right"}}>
                 <Fab dark color='var(--primary)' style={{marginTop: "20px", marginRight: "30px"}}
-                    onClick={() => this.connectWallet()}
+                    onClick={async () => await this.connectWallet()}
                 >
                     &nbsp;<span style={{ fontSize: '24px' }}>&#9729;</span>&nbsp;Connect wallet&nbsp;
                 </Fab>
@@ -146,7 +221,7 @@ class MainContainer extends Component<IProps, IState> {
                                 >
                                     <Card flat>
                                         <Icon path={mdiRun} size={2.5} color='var(--primary)' />
-                                        <H5 style={{ padding: '4px 0px' }}>8,690</H5>
+                                        <H5 style={{ padding: '4px 0px' }}>{this.state.cw20balance}</H5>
 
                                         <Caption secondary className="text-center">
                                             WJUNO
