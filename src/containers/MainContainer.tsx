@@ -18,7 +18,7 @@ import {
 import 'ui-neumorphism/dist/index.css';
 import 'bootstrap-grid-only-css/dist/css/bootstrap-grid.min.css';
 import { Icon } from '@mdi/react';
-import { mdiRun, mdiChevronRight, mdiAlert, mdiSigmaLower, mdiAbugidaDevanagari, mdiAbjadArabic, mdiAbjadHebrew, mdiAlphaW, mdiAlphaWCircle } from '@mdi/js';
+import { mdiChevronRight, mdiAlphaWCircle, mdiArrowDownBoldBox } from '@mdi/js';
 import { CW20, Keplr, TxMsgs, Wjuno, WjunoExtend } from '../services';
 import { CosmWasmFeeTable, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasLimits, defaultGasLimits as defaultStargateGasLimits } from '@cosmjs/stargate';
@@ -35,11 +35,16 @@ interface IState {
     cw20balance?: number;
     connect: boolean;
     disableButtons: boolean;
-    errorValidation: string;
+    errorDValidation: string;
+    errorWValidation: string;
     alertVisible: boolean;
     alertSuccess?: boolean;
     alertMessage?: any;
     loading: boolean;
+    withdrawInput: number;
+    withdrawControl: boolean;
+    depositInput: number;
+    depositControl: boolean;
 }
 
 class MainContainer extends Component<IProps, IState> {
@@ -59,9 +64,14 @@ class MainContainer extends Component<IProps, IState> {
             cw20balance: 0,
             connect: false,
             disableButtons: true,
-            errorValidation: "",
+            errorDValidation: "",
+            errorWValidation: "",
             alertVisible: false,
-            loading: false
+            loading: false,
+            withdrawInput: 0,
+            withdrawControl: false,
+            depositInput: 0,
+            depositControl: false
         };
         overrideThemeVariables({
             '--light-bg': '#E4EBF5',
@@ -132,14 +142,14 @@ class MainContainer extends Component<IProps, IState> {
   async deposit() {
       if (this.depositAmount <= 0) {
           this.setState({
-              errorValidation: "Deposit amount required"
+            errorDValidation: "Deposit amount required"
           });
           return;
       }
 
       if (this.depositAmount > this.state.balance!) {
         this.setState({
-            errorValidation: "Insuficient funds"
+            errorDValidation: "Insuficient funds"
         });
         return;
       }
@@ -164,6 +174,7 @@ class MainContainer extends Component<IProps, IState> {
         }
 
         this.setAlertMessage(true, "Successfull transaction: <a target='_blank' href='https://testnet.juno.aneka.io/txs/" + result.transactionHash + "'>" + result.transactionHash + "</a>");
+        this.setInputDeposit(0);
         await this.updateBalance();
       } catch (error) {
         this.setState({
@@ -177,12 +188,16 @@ class MainContainer extends Component<IProps, IState> {
 
   async withdraw() {
     if (this.withdrawAmount <= 0) {
-        alert("Withdraw amount required");
+        this.setState({
+            errorWValidation: "Withdraw amount required"
+        });
         return;
     }
     
     if (this.withdrawAmount > this.state.cw20balance!) {
-        alert("Insuficient funds");
+        this.setState({
+            errorWValidation: "Insuficient funds"
+        });
         return;
     }
 
@@ -208,6 +223,7 @@ class MainContainer extends Component<IProps, IState> {
         }
 
         this.setAlertMessage(true, "Successfull transaction: <a target='_blank' href='https://testnet.juno.aneka.io/txs/" + result.transactionHash + "'>" + result.transactionHash + "</a>");
+        this.setInputWithdraw(0);
         await this.updateBalance();
     } catch (error) {
         this.setState({
@@ -221,13 +237,48 @@ class MainContainer extends Component<IProps, IState> {
 
   setDepositAmount(e: {value: string}) {
     this.setState({
-        errorValidation: ""
+        errorDValidation: ""
     });
     this.depositAmount = parseFloat(e.value || "0");
   }
 
   setWithdrawAmount(e: {value: string}) {
+    this.setState({
+        errorWValidation: ""
+    });
     this.withdrawAmount = parseFloat(e.value || "0");
+  }
+
+  loadAllWithdrawAmount() {
+      this.setInputWithdraw(this.state.cw20balance!);
+  }
+
+  setInputDeposit(value: number) {
+    this.setState({
+        depositControl: true,
+        depositInput: value
+    });
+    this.depositAmount = value;
+    
+    setTimeout(() => {
+      this.setState({
+        depositControl: false
+      });
+    }, 100);
+  }
+
+  setInputWithdraw(value: number) {
+    this.setState({
+        withdrawControl: true,
+        withdrawInput: value
+    });
+    this.withdrawAmount = value;
+    
+    setTimeout(() => {
+      this.setState({
+          withdrawControl: false
+      });
+    }, 100);
   }
 
   private getWalletMin(wallet: string): string {
@@ -237,7 +288,7 @@ class MainContainer extends Component<IProps, IState> {
       return first+"..."+last;
   }
 
-  setAlertMessage(success: boolean, message: string) {
+  private setAlertMessage(success: boolean, message: string) {
       const msg = <p dangerouslySetInnerHTML={{__html: message}}></p>
       this.setState({
           alertVisible: true,
@@ -259,18 +310,20 @@ class MainContainer extends Component<IProps, IState> {
       <TabItems value={active} >
         <TabItem>
         <Card dark inset style={{ padding: '16px' }}>
-                    <Caption disabled secondary className="mb-3">
+                    <Caption disabled secondary dark className="mb-3">
                         Available: {this.state.balance} JUNO
                     </Caption>
                     <TextField
                         label="Enter amount"
+                        value={this.state.depositInput.toString()}
+                        uncontrolled={this.state.depositControl}
                         onChange={this.setDepositAmount.bind(this)}
                         className="textfield"
                         style={{ margin: "0", width: "100%" }}
                         type='number'
                     ></TextField>
-                    <Caption disabled secondary style={{color: "#ff5252", marginTop: "-12px", display: this.state.errorValidation ? "block": "none"}}>
-                        {this.state.errorValidation}
+                    <Caption disabled secondary style={{color: "#ff5252", marginTop: "-12px", display: this.state.errorDValidation ? "block": "none"}}>
+                        {this.state.errorDValidation}
                     </Caption>
                     <div className="text-center">
                         <IconButton
@@ -292,16 +345,32 @@ class MainContainer extends Component<IProps, IState> {
         </TabItem>
         <TabItem>
         <Card dark inset style={{ padding: '16px' }}>
-                    <Caption disabled secondary className="mb-3">
-                        Available: {this.state.cw20balance} WJUNO
-                    </Caption>
+                    <div className="row">
+                        <div className="col-md-10">
+                            <Caption disabled secondary dark>
+                                Available: {this.state.cw20balance} WJUNO
+                            </Caption>
+                        </div>
+                        <div className="col-md-2" style={{display: "flex", justifyContent: "flex-end"}}>
+                            <IconButton size='small' onClick={this.loadAllWithdrawAmount.bind(this)} style={{marginTop: "-3px"}}>
+                                <Icon path={mdiArrowDownBoldBox} size={0.8} color='var(--primary)'/>
+                            </IconButton>
+                        </div>
+                    </div>
+                    <div>
+                    </div>
                     <TextField
                         label="Enter amount"
+                        value={this.state.withdrawInput.toString()}
                         onChange={this.setWithdrawAmount.bind(this)}
+                        uncontrolled={this.state.withdrawControl}
                         className="textfield"
                         type='number'
                         style={{ margin: "0", width: "100%" }}
                     ></TextField>
+                    <Caption disabled secondary style={{ color: "#ff5252", marginTop: "-12px", display: this.state.errorWValidation ? "block" : "none" }}>
+                        {this.state.errorWValidation}
+                    </Caption>
                     <div className="text-center">
                         <IconButton
                             text={false}
