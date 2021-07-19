@@ -90,6 +90,10 @@ class MainContainer extends Component<IProps, IState> {
       }
       
       const wallet = await this.kep.connect() as string;
+      if (!wallet) {
+          return;
+      }
+      
       this.setState({
         wallet: wallet,
         connect: true,
