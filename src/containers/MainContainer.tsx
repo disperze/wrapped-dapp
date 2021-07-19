@@ -211,7 +211,7 @@ class MainContainer extends Component<IProps, IState> {
             disableButtons: false
         });
         console.log(error);
-        this.setAlertMessage(false, "Ocurrio un error!");  
+        this.setAlertMessage(false, "Error: " + error);
     }
   }
 
