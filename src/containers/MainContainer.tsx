@@ -13,14 +13,17 @@ import {
     Fab,
     Caption,
     IconButton,
+    Avatar,
 } from 'ui-neumorphism';
 import 'ui-neumorphism/dist/index.css';
 import 'bootstrap-grid-only-css/dist/css/bootstrap-grid.min.css';
 import { Icon } from '@mdi/react';
-import { mdiRun, mdiChevronRight } from '@mdi/js';
+import { mdiRun, mdiChevronRight, mdiAlert, mdiSigmaLower, mdiAbugidaDevanagari, mdiAbjadArabic, mdiAbjadHebrew, mdiAlphaW, mdiAlphaWCircle } from '@mdi/js';
 import { CW20, Keplr, TxMsgs, Wjuno, WjunoExtend } from '../services';
 import { CosmWasmFeeTable, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasLimits, defaultGasLimits as defaultStargateGasLimits } from '@cosmjs/stargate';
+import Spacer from '../components/spacer';
+import Notify from '../components/notify';
 
 interface IProps {
 }
@@ -32,6 +35,11 @@ interface IState {
     cw20balance?: number;
     connect: boolean;
     disableButtons: boolean;
+    errorValidation: string;
+    alertVisible: boolean;
+    alertSuccess?: boolean;
+    alertMessage?: any;
+    loading: boolean;
 }
 
 class MainContainer extends Component<IProps, IState> {
@@ -50,17 +58,20 @@ class MainContainer extends Component<IProps, IState> {
             balance: 0,
             cw20balance: 0,
             connect: false,
-            disableButtons: true
+            disableButtons: true,
+            errorValidation: "",
+            alertVisible: false,
+            loading: false
         };
         overrideThemeVariables({
             '--light-bg': '#E4EBF5',
             '--light-bg-dark-shadow': '#bec8e4',
             '--light-bg-light-shadow': '#ffffff',
-            '--dark-bg': '#444444',
-            '--dark-bg-dark-shadow': '#363636',
-            '--dark-bg-light-shadow': '#525252',
-            '--primary': '#2979ff',
-            '--primary-dark': '#2962ff',
+            '--dark-bg': '#1f2237',
+            '--dark-bg-dark-shadow': '#11131e',
+            '--dark-bg-light-shadow': '#353954',
+            '--primary': '#15cc93',
+            '--primary-dark': '#15cc93',
             '--primary-light': '#82b1ff'
         });
         this.gasLimits = {
@@ -85,44 +96,79 @@ class MainContainer extends Component<IProps, IState> {
         disableButtons: false,
       });
       
-      this.conn = await this.kep.getConnection(this.gasLimits);
-      await this.updateBalance();
+      try {
+        this.conn = await this.kep.getConnection(this.gasLimits);
+        await this.updateBalance();
+      } catch (error) {
+        console.log(error);
+        this.setAlertMessage(false, "Error: " + error);
+      }
   }
 
   private async updateBalance() {
       const client = new CW20(this.conn!, this.cw20Contract);
 
-      const cw20Result = await client.balance(this.state.wallet! as string)
-      let balance = parseInt(cw20Result.balance) / Math.pow(10, 6);
-      this.setState({
-        cw20balance: balance,
-      });
-      const result = await this.conn?.getBalance(this.state.wallet!, "ujuno");
-      balance = parseInt(result?.amount!) / Math.pow(10, 6);
-      this.setState({
-        balance: balance,
-      });
+      try {
+          const cw20Result = await client.balance(this.state.wallet! as string)
+          let balance = parseInt(cw20Result.balance) / Math.pow(10, 6);
+          this.setState({
+              cw20balance: balance,
+          });
+          const result = await this.conn?.getBalance(this.state.wallet!, "ujuno");
+          balance = parseInt(result?.amount!) / Math.pow(10, 6);
+          this.setState({
+              balance: balance,
+          });
+      } catch (error) {
+          console.log(error);
+          this.setAlertMessage(false, "Error: " + error);
+      }
   }
 
   async deposit() {
       if (this.depositAmount <= 0) {
-          alert("Deposit amount required");
+          this.setState({
+              errorValidation: "Deposit amount required"
+          });
           return;
       }
 
       if (this.depositAmount > this.state.balance!) {
-        alert("Insuficient funds");
+        this.setState({
+            errorValidation: "Insuficient funds"
+        });
         return;
       }
 
-      const client = new Wjuno(this.conn!, this.contrat);
+      this.setState({
+          loading: true,
+          disableButtons: true,
+      });
+      try {
+        const client = new Wjuno(this.conn!, this.contrat);
 
-      const deposit = this.depositAmount * Math.pow(10, 6);
-      const result = await client.deposit(this.state.wallet!, {amount: deposit.toString(), denom: "ujuno"});
-      console.log(result);
-      alert(result.transactionHash);
+        const deposit = this.depositAmount * Math.pow(10, 6);
+        const result: any = await client.deposit(this.state.wallet!, {amount: deposit.toString(), denom: "ujuno"});
+        this.setState({
+            loading: false,
+            disableButtons: false
+        });
+        if (result.code !== undefined &&
+            result.code !== 0) {
+            this.setAlertMessage(false, "Failed to send tx: " + result.log || result.rawLog);
+            return;
+        }
 
-      await this.updateBalance();
+        this.setAlertMessage(true, "Successfull transaction: <a target='_blank' href='https://testnet.juno.aneka.io/txs/" + result.transactionHash + "'>" + result.transactionHash + "</a>");
+        await this.updateBalance();
+      } catch (error) {
+        this.setState({
+            loading: false,
+            disableButtons: false
+        });
+        console.log(error);
+        this.setAlertMessage(false, "Error: " + error);
+      }
   }
 
   async withdraw() {
@@ -136,18 +182,43 @@ class MainContainer extends Component<IProps, IState> {
         return;
     }
 
-    const txs = new TxMsgs(this.conn!, this.gasLimits);
-    const client = new WjunoExtend(txs, this.contrat);
+    this.setState({
+        loading: true,
+        disableButtons: true
+    });
+    try {
+        const txs = new TxMsgs(this.conn!, this.gasLimits);
+        const client = new WjunoExtend(txs, this.contrat);
+    
+        const withdraw = this.withdrawAmount * Math.pow(10, 6);
+        const result: any = await client.withdrawFull(this.state.wallet!, this.cw20Contract, withdraw.toString());
+        this.setState({
+            loading: false,
+            disableButtons: false
+        });
 
-    const withdraw = this.withdrawAmount * Math.pow(10, 6);
-    const result = await client.withdrawFull(this.state.wallet!, this.cw20Contract, withdraw.toString());
-    console.log(result);
-    alert(result.transactionHash);
+        if (result.code !== undefined &&
+            result.code !== 0) {
+            this.setAlertMessage(false, "Failed to send tx: " + result.log || result.rawLog);
+            return;
+        }
 
-    await this.updateBalance();
+        this.setAlertMessage(true, "Successfull transaction: <a target='_blank' href='https://testnet.juno.aneka.io/txs/" + result.transactionHash + "'>" + result.transactionHash + "</a>");
+        await this.updateBalance();
+    } catch (error) {
+        this.setState({
+            loading: false,
+            disableButtons: false
+        });
+        console.log(error);
+        this.setAlertMessage(false, "Ocurrio un error!");  
+    }
   }
 
   setDepositAmount(e: {value: string}) {
+    this.setState({
+        errorValidation: ""
+    });
     this.depositAmount = parseFloat(e.value || "0");
   }
 
@@ -160,6 +231,21 @@ class MainContainer extends Component<IProps, IState> {
       const last = wallet.substring(wallet.length - 8);
 
       return first+"..."+last;
+  }
+
+  setAlertMessage(success: boolean, message: string) {
+      const msg = <p dangerouslySetInnerHTML={{__html: message}}></p>
+      this.setState({
+          alertVisible: true,
+          alertSuccess: success,
+          alertMessage: msg
+      });
+
+      setTimeout(() => {
+          this.setState({
+              alertVisible: false
+          });
+      }, 5000);
   }
 
   render() {
@@ -179,6 +265,9 @@ class MainContainer extends Component<IProps, IState> {
                         style={{ margin: "0", width: "100%" }}
                         type='number'
                     ></TextField>
+                    <Caption disabled secondary style={{color: "#ff5252", marginTop: "-12px", display: this.state.errorValidation ? "block": "none"}}>
+                        {this.state.errorValidation}
+                    </Caption>
                     <div className="text-center">
                         <IconButton
                             text={false}
@@ -239,6 +328,10 @@ class MainContainer extends Component<IProps, IState> {
 
     return (
         <main className={`theme--dark bootstrap-wrapper`}>
+            <Avatar
+                alt="Disperze Network"
+                style={{float: "left", margin: "20px 0 0 30px"}}
+                src="https://avatars.githubusercontent.com/u/71741453?s=120&v=4"></Avatar>
             <div style={{width: "100%", textAlign: "right"}}>
                 <Fab dark color='var(--primary)' className="connect-btn"
                     style={{marginTop: "20px", marginRight: "30px"}}
@@ -249,8 +342,9 @@ class MainContainer extends Component<IProps, IState> {
             </div>
             <div className="row" style={{margin: "80px 0"}}>
                 <div className="col-md-7 ma-auto">
-                    <Card dark className="pa-5">
+                    <Card dark className="pa-5" loading={this.state.loading}>
                     <CardContent>
+                        <Spacer />
                         <div className="row">
                             <div className="col-md-6" style={{display: "flex"}}>
                                 <Card
@@ -267,7 +361,7 @@ class MainContainer extends Component<IProps, IState> {
                                     className="ma-auto"
                                 >
                                     <Card flat>
-                                        <Icon path={mdiRun} size={2.5} color='var(--primary)' />
+                                        <Icon path={mdiAlphaWCircle} size={2.5} color='var(--primary)' />
                                         <H5 style={{ padding: '4px 0px', textAlign: "center" }}>{this.state.cw20balance}</H5>
 
                                         <Caption secondary className="text-center">
@@ -289,10 +383,16 @@ class MainContainer extends Component<IProps, IState> {
                                 </Card>
                             </div>
                         </div>                        
-                        </CardContent>
+                        <Spacer />
+                    </CardContent>
                     </Card>
                 </div>
             </div>
+            <Notify
+                visible={this.state.alertVisible}
+                success={this.state.alertSuccess}>
+                    {this.state.alertMessage}
+            </Notify>
         </main>
     );
   }
