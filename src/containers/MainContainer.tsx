@@ -429,21 +429,21 @@ class MainContainer extends Component<IProps, IState> {
                                         height: '194px',
                                         borderRadius: '150px',
                                         alignItems: 'center',
-                                        justifyContent: 'center'
+                                        justifyContent: 'center',
+                                        textAlign: "center"
                                     }}
                                     className="ma-auto"
                                 >
                                     <Card flat>
                                         <Icon path={mdiAlphaWCircle} size={2.5} color='var(--primary)' />
-                                        <H5 style={{ padding: '4px 0px', textAlign: "center" }}>{this.state.cw20balance}</H5>
-
-                                        <Caption secondary className="text-center">
+                                        <H5 style={{ padding: '4px 0px' }}>{this.state.cw20balance}</H5>
+                                        <Caption secondary>
                                             WJUNO
                                         </Caption>
                                     </Card>
                                 </Card>
                             </div>
-                            <div className="col-md-6">
+                            <div className="col-md-6 mobile-pacer">
                                 <Card dark className="pa-5">
                                     <Tabs
                                         value={active}
