@@ -135,7 +135,7 @@ class MainContainer extends Component<IProps, IState> {
         await this.updateBalance();
       } catch (error) {
         console.log(error);
-        this.setAlertMessage(false, "Error: " + error);
+        this.setAlertMessage(false, error);
       }
     }
 
@@ -155,7 +155,7 @@ class MainContainer extends Component<IProps, IState> {
           });
       } catch (error) {
           console.log(error);
-          this.setAlertMessage(false, "Error: " + error);
+          this.setAlertMessage(false, error);
       }
   }
 
@@ -202,7 +202,7 @@ class MainContainer extends Component<IProps, IState> {
             disableButtons: false
         });
         console.log(error);
-        this.setAlertMessage(false, "Error: " + error);
+        this.setAlertMessage(false, error);
       }
   }
 
@@ -251,7 +251,7 @@ class MainContainer extends Component<IProps, IState> {
             disableButtons: false
         });
         console.log(error);
-        this.setAlertMessage(false, "Error: " + error);
+        this.setAlertMessage(false, error);
     }
   }
 
