@@ -111,13 +111,15 @@ class MainContainer extends Component<IProps, IState> {
           return;
       }
       
-      const wallet = await this.kep.connect() as string;
-      if (!wallet) {
+      const [success, result] = await this.kep.connect();
+
+      if (!success) {
+          this.setAlertMessage(false, result);
           return;
       }
       
       this.setState({
-        wallet: wallet,
+        wallet: result,
         connect: true,
         disableButtons: false,
       });

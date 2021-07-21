@@ -13,10 +13,6 @@ interface IState {
 }
 
 class Notify extends Component<IProps, IState> {
-    
-    constructor(props: IProps) {
-        super(props);
-    }
 
     render() {
         const {visible, children, success} = this.props

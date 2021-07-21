@@ -26,31 +26,35 @@ export class Keplr {
         );
     }
 
-    async connect(): Promise<String> {
-        const status = await this.registerChain();
-        if (!status) {
-            return "";
+    async connect(): Promise<[boolean, string]> {
+        const error = await this.registerChain();
+        if (error) {
+            return [false, error];
         }
         const chainId = "lucina";
 
         const w = (window as any);
-        await w.keplr.enable(chainId);
+        try {
+            await w.keplr.enable(chainId);
     
-        const offlineSigner = w.getOfflineSigner(chainId);
-    
-        // You can get the address/public keys by `getAccounts` method.
-        // It can return the array of address/public key.
-        // But, currently, Keplr extension manages only one address/public key pair.
-        // XXX: This line is needed to set the sender address for SigningCosmosClient.
-        const accounts = await offlineSigner.getAccounts();
-    
-        return accounts[0].address;
+            const offlineSigner = w.getOfflineSigner(chainId);
+        
+            // You can get the address/public keys by `getAccounts` method.
+            // It can return the array of address/public key.
+            // But, currently, Keplr extension manages only one address/public key pair.
+            // XXX: This line is needed to set the sender address for SigningCosmosClient.
+            const accounts = await offlineSigner.getAccounts();
+        
+            return [true, accounts[0].address];
+        } catch (error) {
+            return [false, error];
+        }
     }
 
-    async registerChain() {
+    async registerChain(): Promise<string> {
         const w = (window as any);
         if (!w.getOfflineSigner || !w.keplr) {
-            alert("Please install keplr extension");
+            return "Please install keplr extension";
         } else {
             if (w.keplr.experimentalSuggestChain) {
                 try {
@@ -140,15 +144,13 @@ export class Keplr {
                         features: ["stargate"]
                     });
     
-                    return true;
+                    return "";
                 } catch {
-                    alert("Failed to suggest the chain");
+                    return "Failed to suggest the chain";
                 }
             } else {
-                alert("Please use the recent version of keplr extension");
+                return "Please use the recent version of keplr extension";
             }
         }
-    
-        return false;
     }
 }
