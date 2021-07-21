@@ -181,7 +181,7 @@ class MainContainer extends Component<IProps, IState> {
       try {
         const client = new Wjuno(this.conn!, this.contrat);
 
-        const deposit = this.depositAmount * Math.pow(10, 6);
+        const deposit = Math.floor(this.depositAmount * Math.pow(10, 6));
         const result: any = await client.deposit(this.state.wallet!, {amount: deposit.toString(), denom: "ujuno"});
         this.setState({
             loading: false,
@@ -229,7 +229,7 @@ class MainContainer extends Component<IProps, IState> {
         const txs = new TxMsgs(this.conn!, this.gasLimits);
         const client = new WjunoExtend(txs, this.contrat);
     
-        const withdraw = this.withdrawAmount * Math.pow(10, 6);
+        const withdraw = Math.floor(this.withdrawAmount * Math.pow(10, 6));
         const result: any = await client.withdrawFull(this.state.wallet!, this.cw20Contract, withdraw.toString());
         this.setState({
             loading: false,
