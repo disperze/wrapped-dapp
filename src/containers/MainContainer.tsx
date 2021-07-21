@@ -105,7 +105,7 @@ class MainContainer extends Component<IProps, IState> {
         window.addEventListener('keplr_keystorechange', this.handleChangeKeplr);
         setTimeout(async () => {
             await this.connectWallet();
-        }, 100);
+        }, 200);
     }
 
     componentWillUnmount() {
