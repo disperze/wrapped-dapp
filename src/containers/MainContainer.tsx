@@ -162,14 +162,14 @@ class MainContainer extends Component<IProps, IState> {
   async deposit() {
       if (this.depositAmount <= 0) {
           this.setState({
-            errorDValidation: "Deposit amount required"
+            errorDValidation: "Amount is required"
           });
           return;
       }
 
       if (this.depositAmount > this.state.balance!) {
         this.setState({
-            errorDValidation: "Insuficient funds"
+            errorDValidation: "Insufficient funds"
         });
         return;
       }
@@ -209,14 +209,14 @@ class MainContainer extends Component<IProps, IState> {
   async withdraw() {
     if (this.withdrawAmount <= 0) {
         this.setState({
-            errorWValidation: "Withdraw amount required"
+            errorWValidation: "Amount is required"
         });
         return;
     }
     
     if (this.withdrawAmount > this.state.cw20balance!) {
         this.setState({
-            errorWValidation: "Insuficient funds"
+            errorWValidation: "Insufficient funds"
         });
         return;
     }
@@ -290,7 +290,8 @@ class MainContainer extends Component<IProps, IState> {
   setInputWithdraw(value: number) {
     this.setState({
         withdrawControl: true,
-        withdrawInput: value
+        withdrawInput: value,
+        errorWValidation: ""
     });
     this.withdrawAmount = value;
     
