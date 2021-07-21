@@ -1,4 +1,4 @@
-import { mdiAlert, mdiCheck, mdiCheckCircle } from '@mdi/js';
+import { mdiAlert, mdiCheckCircle } from '@mdi/js';
 import Icon from '@mdi/react';
 import { Component } from 'react';
 import { Alert } from 'ui-neumorphism';
