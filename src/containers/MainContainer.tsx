@@ -48,7 +48,7 @@ interface IState {
 }
 
 class MainContainer extends Component<IProps, IState> {
-    kep: Keplr = new Keplr;
+    kep: Keplr = new Keplr();
     conn?: SigningCosmWasmClient;
     contrat: string = "juno1qglsnq9juk38325t02jfx44rg85jxsx4rg2xc8";
     cw20Contract: string = "juno18j6kr2f6l8yvn62wsu35mrwucxrq239d9ss9ry";

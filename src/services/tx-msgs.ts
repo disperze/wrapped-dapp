@@ -1,4 +1,4 @@
-import { CosmWasmFeeTable, defaultGasLimits, ExecuteResult, MsgExecuteContractEncodeObject, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { CosmWasmFeeTable, ExecuteResult, MsgExecuteContractEncodeObject, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { toUtf8 } from "@cosmjs/encoding";
 import { defaultGasPrice, Coin, buildFeeTable, isBroadcastTxFailure, BroadcastTxFailure, logs, GasLimits } from "@cosmjs/stargate";
 import { EncodeObject } from "@cosmjs/proto-signing";

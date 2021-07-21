@@ -1,14 +1,8 @@
 import { CosmWasmFeeTable, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { GasLimits } from "@cosmjs/stargate"
 
-interface TokenInfo {
-    symbol: String
-}
-
 export class Keplr {
-    constructor() {
-    }
-
+    
     async getConnection(gasLimits: GasLimits<CosmWasmFeeTable>): Promise<SigningCosmWasmClient> {
         const chainId = "lucina";
 
