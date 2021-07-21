@@ -1,4 +1,4 @@
-import { mdiAlert, mdiCheck } from '@mdi/js';
+import { mdiAlert, mdiCheck, mdiCheckCircle } from '@mdi/js';
 import Icon from '@mdi/react';
 import { Component } from 'react';
 import { Alert } from 'ui-neumorphism';
@@ -20,10 +20,10 @@ class Notify extends Component<IProps, IState> {
         return ( 
             visible ? <Alert
                 type={success ? 'success': 'error'}
-                style={{ position: 'absolute', bottom: "16px", right: "16px", maxWidth: "640px" }}
+                style={{ position: 'absolute', bottom: "16px", right: "16px", maxWidth: "660px" }}
                 dark
                 border='left'
-                icon={<Icon path={success ? mdiCheck : mdiAlert} size={1} />}
+                icon={<Icon path={success ? mdiCheckCircle : mdiAlert} size={1} />}
             >{children}</Alert>
             : null
         );
