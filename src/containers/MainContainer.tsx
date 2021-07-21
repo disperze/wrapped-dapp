@@ -94,7 +94,16 @@ class MainContainer extends Component<IProps, IState> {
         };
     }
 
-  async connectWallet() {
+    componentDidMount() {
+        window.addEventListener('keplr_keystorechange', async (e) => {
+            this.setState({
+                connect: false,
+            });
+            await this.connectWallet();
+        });
+    }
+
+    async connectWallet() {
       if (this.state.connect) {
           return;
       }
@@ -117,7 +126,7 @@ class MainContainer extends Component<IProps, IState> {
         console.log(error);
         this.setAlertMessage(false, "Error: " + error);
       }
-  }
+    }
 
   private async updateBalance() {
       const client = new CW20(this.conn!, this.cw20Contract);
