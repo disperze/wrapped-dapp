@@ -101,6 +101,9 @@ class MainContainer extends Component<IProps, IState> {
             });
             await this.connectWallet();
         });
+        setTimeout(async () => {
+            await this.connectWallet();
+        }, 100);
     }
 
     async connectWallet() {
