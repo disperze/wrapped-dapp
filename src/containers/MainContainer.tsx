@@ -94,16 +94,22 @@ class MainContainer extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount() {
-        window.addEventListener('keplr_keystorechange', async (e) => {
-            this.setState({
-                connect: false,
-            });
-            await this.connectWallet();
+    private handleChangeKeplr = async () => {
+        this.setState({
+            connect: false,
         });
+        await this.connectWallet();
+    };
+
+    componentDidMount() {
+        window.addEventListener('keplr_keystorechange', this.handleChangeKeplr);
         setTimeout(async () => {
             await this.connectWallet();
         }, 100);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('keplr_keystorechange', this.handleChangeKeplr);
     }
 
     async connectWallet() {
@@ -187,7 +193,7 @@ class MainContainer extends Component<IProps, IState> {
             return;
         }
 
-        this.setAlertMessage(true, "Successfull transaction: <a target='_blank' href='https://testnet.juno.aneka.io/txs/" + result.transactionHash + "'>" + result.transactionHash + "</a>");
+        this.setAlertMessage(true, this.getTxSuccessMessage(result.transactionHash));
         this.setInputDeposit(0);
         await this.updateBalance();
       } catch (error) {
@@ -236,7 +242,7 @@ class MainContainer extends Component<IProps, IState> {
             return;
         }
 
-        this.setAlertMessage(true, "Successfull transaction: <a target='_blank' href='https://testnet.juno.aneka.io/txs/" + result.transactionHash + "'>" + result.transactionHash + "</a>");
+        this.setAlertMessage(true, this.getTxSuccessMessage(result.transactionHash));
         this.setInputWithdraw(0);
         await this.updateBalance();
     } catch (error) {
@@ -293,6 +299,10 @@ class MainContainer extends Component<IProps, IState> {
           withdrawControl: false
       });
     }, 100);
+  }
+
+  private getTxSuccessMessage(tx: string): string {
+    return "Transaction successful <br><a target='_blank' href='https://testnet.juno.aneka.io/txs/" + tx + "'>View explorer</a>";
   }
 
   private getWalletMin(wallet: string): string {
