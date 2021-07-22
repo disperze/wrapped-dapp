@@ -50,8 +50,8 @@ interface IState {
 class MainContainer extends Component<IProps, IState> {
     kep: Keplr = new Keplr();
     conn?: SigningCosmWasmClient;
-    contrat: string = "juno1qglsnq9juk38325t02jfx44rg85jxsx4rg2xc8";
-    cw20Contract: string = "juno18j6kr2f6l8yvn62wsu35mrwucxrq239d9ss9ry";
+    contrat: string = "juno1nnrsydp4qa3m7sw89gqz9caa089sjyrycywwq2";
+    cw20Contract: string = "juno1nnrsydp4qa3m7sw89gqz9caa089sjyrycywwq2";
     depositAmount: number = 0;
     withdrawAmount: number = 0;
     private gasLimits: GasLimits<CosmWasmFeeTable>;
@@ -226,11 +226,10 @@ class MainContainer extends Component<IProps, IState> {
         disableButtons: true
     });
     try {
-        const txs = new TxMsgs(this.conn!, this.gasLimits);
-        const client = new WjunoExtend(txs, this.contrat);
+        const client = new Wjuno(this.conn!, this.contrat);
     
         const withdraw = Math.floor(this.withdrawAmount * Math.pow(10, 6));
-        const result: any = await client.withdrawFull(this.state.wallet!, this.cw20Contract, withdraw.toString());
+        const result: any = await client.withdraw(this.state.wallet!, withdraw.toString());
         this.setState({
             loading: false,
             disableButtons: false
