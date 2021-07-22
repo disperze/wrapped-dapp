@@ -50,8 +50,8 @@ interface IState {
 class MainContainer extends Component<IProps, IState> {
     kep: Keplr = new Keplr();
     conn?: SigningCosmWasmClient;
-    contrat: string = "juno1nnrsydp4qa3m7sw89gqz9caa089sjyrycywwq2";
-    cw20Contract: string = "juno1nnrsydp4qa3m7sw89gqz9caa089sjyrycywwq2";
+    contrat: string = "juno1ns8ujs5lt6mvl3dvxra4kk5acrzx3n7uuwtdpt";
+    cw20Contract: string = "juno1ns8ujs5lt6mvl3dvxra4kk5acrzx3n7uuwtdpt";
     depositAmount: number = 0;
     withdrawAmount: number = 0;
     private gasLimits: GasLimits<CosmWasmFeeTable>;
