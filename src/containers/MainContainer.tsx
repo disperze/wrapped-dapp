@@ -89,7 +89,7 @@ class MainContainer extends Component<IProps, IState> {
             upload: 1_500_000,
             init: 500_000,
             migrate: 200_000,
-            exec: 240_000,
+            exec: 140_000,
             changeAdmin: 80_000,
         };
     }
