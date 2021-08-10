@@ -24,6 +24,7 @@ import { CosmWasmFeeTable, SigningCosmWasmClient } from '@cosmjs/cosmwasm-starga
 import { GasLimits, defaultGasLimits as defaultStargateGasLimits } from '@cosmjs/stargate';
 import Spacer from '../components/spacer';
 import Notify from '../components/notify';
+import { settings } from '../settings';
 
 interface IProps {
 }
@@ -50,8 +51,8 @@ interface IState {
 class MainContainer extends Component<IProps, IState> {
     kep: Keplr = new Keplr();
     conn?: SigningCosmWasmClient;
-    contrat: string = "juno1ns8ujs5lt6mvl3dvxra4kk5acrzx3n7uuwtdpt";
-    cw20Contract: string = "juno1ns8ujs5lt6mvl3dvxra4kk5acrzx3n7uuwtdpt";
+    contrat: string = settings.ContractAddress;
+    cw20Contract: string = settings.ContractAddress;
     depositAmount: number = 0;
     withdrawAmount: number = 0;
     private gasLimits: GasLimits<CosmWasmFeeTable>;
