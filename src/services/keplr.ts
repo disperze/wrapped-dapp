@@ -3,7 +3,7 @@ import { GasLimits } from "@cosmjs/stargate"
 
 export class Keplr {
     
-    async getConnection(gasLimits: GasLimits<CosmWasmFeeTable>): Promise<SigningCosmWasmClient> {
+    async getConnection(node: string, gasLimits: GasLimits<CosmWasmFeeTable>): Promise<SigningCosmWasmClient> {
         const chainId = "lucina";
 
         const w = (window as any);
@@ -12,7 +12,7 @@ export class Keplr {
         const offlineSigner = w.getOfflineSigner(chainId);
 
         return SigningCosmWasmClient.connectWithSigner(
-            "https://rpc.juno.giansalex.dev:443",
+            node,
             offlineSigner,
             {
                 gasLimits: gasLimits

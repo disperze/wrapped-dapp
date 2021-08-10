@@ -132,7 +132,7 @@ class MainContainer extends Component<IProps, IState> {
       });
       
       try {
-        this.conn = await this.kep.getConnection(this.gasLimits);
+        this.conn = await this.kep.getConnection(settings.NodeUrl, this.gasLimits);
         await this.updateBalance();
       } catch (error) {
         console.log(error);
