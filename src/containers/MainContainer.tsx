@@ -303,7 +303,7 @@ class MainContainer extends Component<IProps, IState> {
   }
 
   private getTxSuccessMessage(tx: string): string {
-    return "Transaction successful <br><a target='_blank' href='https://testnet.juno.aneka.io/txs/" + tx + "'>View explorer</a>";
+    return "Transaction successful <br><a target='_blank' href='https://blueprints.juno.giansalex.dev/#/transactions/" + tx + "'>View explorer</a>";
   }
 
   private getWalletMin(wallet: string): string {
