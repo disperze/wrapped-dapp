@@ -92,7 +92,7 @@ export class Keplr {
                             average: 0.025,
                             high: 0.04
                         },
-                        features: ["stargate", 'ibc-transfer'],
+                        features: ["stargate", 'ibc-transfer', 'cosmwasm'],
                         explorerUrlToTx: 'https://testnet.juno.aneka.io/txs/{txHash}',
                     });
     
