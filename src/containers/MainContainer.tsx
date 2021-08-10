@@ -25,6 +25,7 @@ import { GasLimits, defaultGasLimits as defaultStargateGasLimits } from '@cosmjs
 import Spacer from '../components/spacer';
 import Notify from '../components/notify';
 import { settings } from '../settings';
+import { BalanceCard } from '../components/BalanceCard';
 
 interface IProps {
 }
@@ -444,28 +445,7 @@ class MainContainer extends Component<IProps, IState> {
                         <Spacer />
                         <div className="row">
                             <div className="col-md-6" style={{display: "flex"}}>
-                                <Card
-                                    dark
-                                    elevation={3}
-                                    style={{
-                                        display: 'flex',
-                                        width: '194px',
-                                        height: '194px',
-                                        borderRadius: '150px',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        textAlign: "center"
-                                    }}
-                                    className="ma-auto"
-                                >
-                                    <Card flat>
-                                        <Icon path={mdiAlphaWCircle} size={2.5} color='var(--primary)' />
-                                        <H5 style={{ padding: '4px 0px' }}>{this.state.cw20balance}</H5>
-                                        <Caption secondary>
-                                            WJUNO
-                                        </Caption>
-                                    </Card>
-                                </Card>
+                                <BalanceCard amount={this.state.cw20balance} symbol={"WJUNO"} />
                             </div>
                             <div className="col-md-6 mobile-pacer">
                                 <Card dark className="pa-5">
