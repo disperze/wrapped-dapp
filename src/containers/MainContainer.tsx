@@ -51,8 +51,7 @@ interface IState {
 class MainContainer extends Component<IProps, IState> {
     kep: Keplr = new Keplr();
     conn?: SigningCosmWasmClient;
-    contrat: string = settings.ContractAddress;
-    cw20Contract: string = settings.ContractAddress;
+    contract: string = settings.ContractAddress;
     depositAmount: number = 0;
     withdrawAmount: number = 0;
     private gasLimits: GasLimits<CosmWasmFeeTable>;
@@ -141,7 +140,7 @@ class MainContainer extends Component<IProps, IState> {
     }
 
   private async updateBalance() {
-      const client = new CW20(this.conn!, this.cw20Contract);
+      const client = new CW20(this.conn!, this.contract);
 
       try {
           const cw20Result = await client.balance(this.state.wallet! as string)
@@ -180,7 +179,7 @@ class MainContainer extends Component<IProps, IState> {
           disableButtons: true,
       });
       try {
-        const client = new Wjuno(this.conn!, this.contrat);
+        const client = new Wjuno(this.conn!, this.contract);
 
         const deposit = Math.floor(this.depositAmount * Math.pow(10, 6));
         const result: any = await client.deposit(this.state.wallet!, {amount: deposit.toString(), denom: "ujuno"});
@@ -227,7 +226,7 @@ class MainContainer extends Component<IProps, IState> {
         disableButtons: true
     });
     try {
-        const client = new Wjuno(this.conn!, this.contrat);
+        const client = new Wjuno(this.conn!, this.contract);
     
         const withdraw = Math.floor(this.withdrawAmount * Math.pow(10, 6));
         const result: any = await client.withdraw(this.state.wallet!, withdraw.toString());
