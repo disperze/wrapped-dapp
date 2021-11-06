@@ -10,10 +10,4 @@ export class CW20 {
 
         return this.client.queryContractSmart(this.contract, queryMsg);
     }
-
-    allowance(sender: string, spender: string, amount: string) {
-        const executMsg = {increase_allowance: {spender: spender, amount: amount}};
-
-        return this.client.execute(sender, this.contract, executMsg);
-    }
 }
