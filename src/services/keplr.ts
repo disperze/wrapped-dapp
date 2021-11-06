@@ -4,7 +4,7 @@ import { GasLimits } from "@cosmjs/stargate"
 export class Keplr {
     
     async getConnection(node: string, gasLimits: GasLimits<CosmWasmFeeTable>): Promise<SigningCosmWasmClient> {
-        const chainId = "lucina";
+        const chainId = "uni";
 
         const w = (window as any);
         await w.keplr.enable(chainId);
@@ -25,7 +25,7 @@ export class Keplr {
         if (error) {
             return [false, error];
         }
-        const chainId = "lucina";
+        const chainId = "uni";
 
         const w = (window as any);
         try {
@@ -53,13 +53,13 @@ export class Keplr {
             if (w.keplr.experimentalSuggestChain) {
                 try {
                     await w.keplr.experimentalSuggestChain({
-                        chainId: "lucina",
-                        chainName: "Juno testnet",
+                        chainId: "uni",
+                        chainName: "Juno Testnet",
                         rpc: "https://rpc.juno.giansalex.dev:443",
                         rest: "https://lcd.juno.giansalex.dev:443",
                         stakeCurrency: {
-                            coinDenom: "JUNO",
-                            coinMinimalDenom: "ujuno",
+                            coinDenom: "JUNOX",
+                            coinMinimalDenom: "ujunox",
                             coinDecimals: 6,
                             // coinGeckoId: ""
                         },
@@ -76,24 +76,24 @@ export class Keplr {
                             bech32PrefixConsPub: "junovalconspub"
                         },
                         currencies: [{
-                            coinDenom: "JUNO",
-                            coinMinimalDenom: "ujuno",
+                            coinDenom: "JUNOX",
+                            coinMinimalDenom: "ujunox",
                             coinDecimals: 6,
                             // coinGeckoId: ""
                         }],
                         feeCurrencies: [{
-                            coinDenom: "JUNO",
-                            coinMinimalDenom: "ujuno",
+                            coinDenom: "JUNOX",
+                            coinMinimalDenom: "ujunox",
                             coinDecimals: 6,
                             // coinGeckoId: ""
                         }],
                         gasPriceStep: {
-                            low: 0.01,
-                            average: 0.025,
-                            high: 0.04
+                            low: 0.001,
+                            average: 0.002,
+                            high: 0.004
                         },
-                        features: ["stargate", 'ibc-transfer', 'cosmwasm'],
-                        explorerUrlToTx: 'https://testnet.juno.aneka.io/txs/{txHash}',
+                        features: ["stargate", 'ibc-transfer', 'cosmwasm', 'no-legacy-stdTx'],
+                        explorerUrlToTx: 'https://blueprints.juno.giansalex.dev/#/transactions/{txHash}',
                     });
     
                     return "";
