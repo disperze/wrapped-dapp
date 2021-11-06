@@ -8,7 +8,6 @@ import {
     Tabs,
     overrideThemeVariables,
     CardContent,
-    H5,
     TextField,
     Fab,
     Caption,
@@ -18,10 +17,9 @@ import {
 import 'ui-neumorphism/dist/index.css';
 import 'bootstrap-grid-only-css/dist/css/bootstrap-grid.min.css';
 import { Icon } from '@mdi/react';
-import { mdiChevronRight, mdiAlphaWCircle, mdiArrowDownBoldBox } from '@mdi/js';
-import { CW20, Keplr, TxMsgs, Wjuno, WjunoExtend } from '../services';
-import { CosmWasmFeeTable, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasLimits, defaultGasLimits as defaultStargateGasLimits } from '@cosmjs/stargate';
+import { mdiChevronRight, mdiArrowDownBoldBox } from '@mdi/js';
+import { CW20, Keplr, Wjuno } from '../services';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import Spacer from '../components/spacer';
 import Notify from '../components/notify';
 import { settings } from '../settings';
@@ -55,7 +53,6 @@ class MainContainer extends Component<IProps, IState> {
     contract: string = settings.ContractAddress;
     depositAmount: number = 0;
     withdrawAmount: number = 0;
-    private gasLimits: GasLimits<CosmWasmFeeTable>;
     
     constructor (props: IProps) {
         super(props);
@@ -85,14 +82,6 @@ class MainContainer extends Component<IProps, IState> {
             '--primary-dark': '#15cc93',
             '--primary-light': '#82b1ff'
         });
-        this.gasLimits = {
-            ...defaultStargateGasLimits,
-            upload: 1_500_000,
-            init: 500_000,
-            migrate: 200_000,
-            exec: 140_000,
-            changeAdmin: 80_000,
-        };
     }
 
     private handleChangeKeplr = async () => {
@@ -132,11 +121,11 @@ class MainContainer extends Component<IProps, IState> {
       });
       
       try {
-        this.conn = await this.kep.getConnection(settings.NodeUrl, this.gasLimits);
+        this.conn = await this.kep.getConnection(settings.NodeUrl);
         await this.updateBalance();
       } catch (error) {
         console.log(error);
-        this.setAlertMessage(false, error);
+        this.setAlertMessage(false, `${error}`);
       }
     }
 
@@ -156,7 +145,7 @@ class MainContainer extends Component<IProps, IState> {
           });
       } catch (error) {
           console.log(error);
-          this.setAlertMessage(false, error);
+          this.setAlertMessage(false, `${error}`);
       }
   }
 
@@ -203,7 +192,7 @@ class MainContainer extends Component<IProps, IState> {
             disableButtons: false
         });
         console.log(error);
-        this.setAlertMessage(false, error);
+        this.setAlertMessage(false, `${error}`);
       }
   }
 
@@ -251,7 +240,7 @@ class MainContainer extends Component<IProps, IState> {
             disableButtons: false
         });
         console.log(error);
-        this.setAlertMessage(false, error);
+        this.setAlertMessage(false, `${error}`);
     }
   }
 

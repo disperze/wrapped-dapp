@@ -1,9 +1,8 @@
-import { CosmWasmFeeTable, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { GasLimits } from "@cosmjs/stargate"
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 export class Keplr {
     
-    async getConnection(node: string, gasLimits: GasLimits<CosmWasmFeeTable>): Promise<SigningCosmWasmClient> {
+    async getConnection(node: string): Promise<SigningCosmWasmClient> {
         const chainId = "uni";
 
         const w = (window as any);
@@ -13,10 +12,7 @@ export class Keplr {
 
         return SigningCosmWasmClient.connectWithSigner(
             node,
-            offlineSigner,
-            {
-                gasLimits: gasLimits
-            }
+            offlineSigner
         );
     }
 
@@ -41,7 +37,7 @@ export class Keplr {
         
             return [true, accounts[0].address];
         } catch (error) {
-            return [false, error];
+            return [false, `${error}`];
         }
     }
 
