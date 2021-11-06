@@ -24,6 +24,7 @@ import Spacer from '../components/spacer';
 import Notify from '../components/notify';
 import { settings } from '../settings';
 import { BalanceCard } from '../components/BalanceCard';
+import { TokenInfo } from '../services/cw20-balance';
 
 interface IProps {
 }
@@ -51,6 +52,8 @@ class MainContainer extends Component<IProps, IState> {
     kep: Keplr = new Keplr();
     conn?: SigningCosmWasmClient;
     contract: string = settings.ContractAddress;
+    tokenInfo: TokenInfo;
+    nativeCoin: string = "ujunox";
     depositAmount: number = 0;
     withdrawAmount: number = 0;
     
@@ -82,6 +85,11 @@ class MainContainer extends Component<IProps, IState> {
             '--primary-dark': '#15cc93',
             '--primary-light': '#82b1ff'
         });
+        this.tokenInfo = {
+            name: "Wrapped JUNO",
+            symbol: "WJUNO",
+            decimals: 6
+        };
     }
 
     private handleChangeKeplr = async () => {
@@ -122,6 +130,8 @@ class MainContainer extends Component<IProps, IState> {
       
       try {
         this.conn = await this.kep.getConnection(settings.NodeUrl);
+        const client = new CW20(this.conn!, this.contract);
+        this.tokenInfo = await client.tokenInfo();
         await this.updateBalance();
       } catch (error) {
         console.log(error);
@@ -138,7 +148,7 @@ class MainContainer extends Component<IProps, IState> {
           this.setState({
               cw20balance: balance,
           });
-          const result = await this.conn?.getBalance(this.state.wallet!, "ujuno");
+          const result = await this.conn?.getBalance(this.state.wallet!, this.nativeCoin);
           balance = parseInt(result?.amount!) / Math.pow(10, 6);
           this.setState({
               balance: balance,
@@ -172,7 +182,7 @@ class MainContainer extends Component<IProps, IState> {
         const client = new Wjuno(this.conn!, this.contract);
 
         const deposit = Math.floor(this.depositAmount * Math.pow(10, 6));
-        const result: any = await client.deposit(this.state.wallet!, {amount: deposit.toString(), denom: "ujuno"});
+        const result: any = await client.deposit(this.state.wallet!, {amount: deposit.toString(), denom: this.nativeCoin});
         this.setState({
             loading: false,
             disableButtons: false
@@ -325,7 +335,7 @@ class MainContainer extends Component<IProps, IState> {
         <TabItem>
         <Card dark inset style={{ padding: '16px' }}>
                     <Caption disabled secondary dark className="mb-3">
-                        Available: {this.state.balance} JUNO
+                        Available: {this.state.balance} JUNOX
                     </Caption>
                     <TextField
                         label="Enter amount"
@@ -362,7 +372,7 @@ class MainContainer extends Component<IProps, IState> {
                     <div className="row">
                         <div className="col-md-10">
                             <Caption disabled secondary dark>
-                                Available: {this.state.cw20balance} WJUNO
+                                Available: {this.state.cw20balance} {this.tokenInfo.symbol}
                             </Caption>
                         </div>
                         <div className="col-md-2" style={{display: "flex", justifyContent: "flex-end"}}>
@@ -434,7 +444,7 @@ class MainContainer extends Component<IProps, IState> {
                         <Spacer />
                         <div className="row">
                             <div className="col-md-6" style={{display: "flex"}}>
-                                <BalanceCard amount={this.state.cw20balance} symbol={"WJUNO"} />
+                                <BalanceCard amount={this.state.cw20balance} symbol={this.tokenInfo.symbol} />
                             </div>
                             <div className="col-md-6 mobile-pacer">
                                 <Card dark className="pa-5">
